@@ -1,13 +1,20 @@
-name: 'Hello World'
-description: 'Greet someone and record the time'
+name: Set up NASM
+description: Download and install NASM
 inputs:
-  who-to-greet:  # id of input
-    description: 'Who to greet'
+  version:
+    description: NASM version to install
     required: true
-    default: 'World'
-outputs:
-  time: # id of output
-    description: 'The time we greeted you'
+    default: 2.14.02
+  from-source:
+    description: Force or deny compilation from source code
+  platform:
+    description: |
+      Override platform selection
+      One of: `dos`, `linux`, `macosx`, `win32`, `win64`
+      See https://www.nasm.us/pub/nasm/releasebuilds/ for available platforms.
 runs:
-  using: 'node12'
-  main: 'index.js'
+  using: node12
+  main: index.js
+branding:
+  icon: archive
+  color: blue

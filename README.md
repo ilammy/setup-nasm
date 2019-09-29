@@ -1,21 +1,35 @@
-# Hello world javascript action
+<a href="https://github.com/ilammy/setup-nasm"><img alt="GitHub Actions status" src="https://github.com/ilammy/setup-nasm/workflows/setup-nasm/badge.svg"></a>
 
-This action prints "Hello World" or "Hello" + the name of a person to greet to the log.
+# setup-nasm
+
+[GitHub Action](https://github.com/features/actions) for installing [NASM](https://www.nasm.us)
+into PATH for the job.
+
+This downloads official binaries if possible, falling back to compilation from source code.
+
+Supports Linux, macOS, and Windows.
 
 ## Inputs
 
-### `who-to-greet`
-
-**Required** The name of the person to greet. Default `"World"`.
-
-## Outputs
-
-### `time`
-
-The time we greeted you.
+- `version` – version of NASM to install (default: 2.14.02)
+- `from-source` – set to `true` to always build from source, or `false` to never
+- `platform` – set binary platform to something non-standard
+- `destination` – target directory for download and installation (default: `$HOME/nasm`)
 
 ## Example usage
 
-uses: actions/hello-world-javascript-action@v1
-with:
-  who-to-greet: 'Mona the Octocat'
+```yaml
+jobs:
+  test:
+    - uses: ilammy/setup-nasm@v1
+    - uses: actions/checkout@v1
+    - name: Build something requiring NASM
+      run: |
+        cd third_party/boringssl
+        cmake -G Ninja . && ninja
+    # ...
+```
+
+## License
+
+MIT, see [LICENSE](LICENSE).
