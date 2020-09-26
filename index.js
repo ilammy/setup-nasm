@@ -212,4 +212,4 @@ async function fetchBuffer(url) {
     return buffer
 }
 
-main().catch(() => core.setFailed(`could not install NASM: ${e}`))
+main().catch((e) => core.setFailed(`could not install NASM: ${e}`))
