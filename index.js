@@ -24,8 +24,8 @@ async function main() {
     const destination = core.getInput('destination') || 'nasm'
     const from_source = core.getInput('from-source')
     // Yeah, these are strings... JavaScript at its finest
-    const try_binary = (from_source != 'true')
-    const try_source = (from_source != 'false')
+    var try_binary = (from_source != 'true')
+    var try_source = (from_source != 'false')
     const platform = selectPlatform(core.getInput('platform'))
 
     const homedir = require('os').homedir()
