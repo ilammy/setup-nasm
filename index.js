@@ -40,7 +40,7 @@ async function main() {
     // NASM publishes borked macOS binaries for older releases. Modern macOS
     // does not support 32-bit binaries and for some reason throws "Bad CPU type"
     // errors if a binary contain 32-bit code slice. Build old versions from source.
-    if (platform == 'macos') {
+    if (platform == 'macosx') {
         let match = version.match(/^(\d+)\.(\d+)/)
         let major = parseInt(match[1])
         let minor = parseInt(match[2])
