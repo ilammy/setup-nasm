@@ -37,6 +37,19 @@ async function main() {
         fs.mkdirSync(absNasmDir, {recursive: true})
     }
 
+    // NASM publishes borked macOS binaries for older releases. Modern macOS
+    // does not support 32-bit binaries and for some reason throws "Bad CPU type"
+    // errors if a binary contain 32-bit code slice. Build old versions from source.
+    if (platform == 'macos') {
+        let match = version.match(/^(\d+)\.(\d+)/)
+        let major = match[1]
+        let minor = match[2]
+        if (major < 2 || (major == 2 && minor < 14)) {
+            core.debug(`nasm binary version is not available on macOS: ${version}`)
+            try_binary = false
+        }
+    }
+
     async function downloadBinary() {
         const url = new URL(`https://www.nasm.us/pub/nasm/releasebuilds/${version}/${platform}/nasm-${version}-${platform}.zip`)
         const buffer = await fetchBuffer(url)
