@@ -24,8 +24,8 @@ async function main() {
     const destination = core.getInput('destination') || 'nasm'
     const from_source = core.getInput('from-source')
     // Yeah, these are strings... JavaScript at its finest
-    const try_binary = (from_source != 'true')
-    const try_source = (from_source != 'false')
+    var try_binary = (from_source != 'true')
+    var try_source = (from_source != 'false')
     const platform = selectPlatform(core.getInput('platform'))
 
     const homedir = require('os').homedir()
@@ -35,6 +35,25 @@ async function main() {
 
     if (!fs.existsSync(absNasmDir)) {
         fs.mkdirSync(absNasmDir, {recursive: true})
+    }
+
+    // NASM publishes borked macOS binaries for older releases. Modern macOS
+    // does not support 32-bit binaries and for some reason throws "Bad CPU type"
+    // errors if a binary contain 32-bit code slice. Build old versions from source.
+    if (platform == 'macosx') {
+        let match = version.match(/^(\d+)\.(\d+)/)
+        let major = parseInt(match[1])
+        let minor = parseInt(match[2])
+        if (major < 2 || (major == 2 && minor < 14)) {
+            core.info(`Requested NASM version ${version} has incompatible prebuilt binaries.`)
+            core.info(`Only source builds are supported on macOS.`)
+            if (try_source) {
+                core.info(`Will try building from source.`)
+                try_binary = false
+            } else {
+                core.warning(`Trying binary build at your own risk.`)
+            }
+        }
     }
 
     async function downloadBinary() {
@@ -193,4 +212,4 @@ async function fetchBuffer(url) {
     return buffer
 }
 
-main().catch(() => core.setFailed('could not install NASM'))
+main().catch((e) => core.setFailed(`could not install NASM: ${e}`))
