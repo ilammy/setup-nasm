@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/ilammy/setup-nasm#readme",
   "dependencies": {
-    "@actions/core": "^1.1.1",
+    "@actions/core": "^1.2.6",
     "adm-zip": "^0.4.13",
     "node-fetch": "^2.6.1"
   },
