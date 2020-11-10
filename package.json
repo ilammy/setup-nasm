@@ -28,6 +28,6 @@
     "node-fetch": "^2.6.1"
   },
   "devDependencies": {
-    "eslint": "^6.5.0"
+    "eslint": "^7.13.0"
   }
 }
