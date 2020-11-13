@@ -5,7 +5,10 @@ const fs = require('fs')
 const fetch = require('node-fetch')
 const path = require('path')
 const process = require('process')
+const stream = require('stream')
+const tar = require('tar-fs')
 const URL = require('url').URL
+const util = require('util')
 
 // This could have been a ten-line shell script, but no, we are full-stack async now...
 // Though, it does look pretty in the Web console.
@@ -75,47 +78,47 @@ async function main() {
     }
 
     async function buildFromSource() {
-        const url = new URL(`https://www.nasm.us/pub/nasm/releasebuilds/${version}/nasm-${version}.zip`)
+        const url = new URL(`https://www.nasm.us/pub/nasm/releasebuilds/${version}/nasm-${version}.tar.gz`)
         const buffer = await fetchBuffer(url)
-        const zip = new AdmZip(buffer)
+        // node-fetch returns already ungzipped tarball.
+        await extractTar(buffer, absNasmDir)
 
-        zip.extractAllTo(absNasmDir)
+        // The tarball has all content in a versioned subdirectory: "nasm-2.15.05".
+        const sourceDir = path.join(absNasmDir, `nasm-${version}`)
+        core.debug(`extracted NASM to '${sourceDir}'`)
 
-        // NASM uses the usual "./configure && make" but ZIP makes it harder.
-        // First of all, configure shell script usually ends up with Windows
-        // line endings which breaks the shebang line on non-Windows machines.
-        const configurePath = path.join(absNasmDir, 'configure')
+        // NASM uses the usual "./configure && make", but make sure we extracted
+        // everything correctly before jumping in.
+        const configurePath = path.join(sourceDir, 'configure')
         if (!fs.existsSync(configurePath)) {
             core.debug(`configure script missing: ${configurePath}`)
-            throw new Error(`failed to extract to '${absNasmDir}'`)
+            throw new Error(`failed to extract to '${sourceDir}'`)
         }
-        dos2unix(configurePath)
-        fs.chmodSync(configurePath, '755')
 
         // Now we can run "./configure". Node.js does not allow to change current
         // working directory for the current process, so we use absolute paths.
-        execute([configurePath], {cwd: absNasmDir})
+        execute([configurePath], {cwd: sourceDir})
 
         // Now comes the fun part! Somehow, despite smoking Autocrack, NASM manages
         // to botch up platform detection. Or that's Apple thinking different again,
         // I don't know. Whatever it is, here are magic patches to make things work.
         if (platform == 'linux' || platform == 'macosx') {
             if (version.match(/2.14/)) {
-                appendFile(path.join(absNasmDir, 'include/compiler.h'), [
+                appendFile(path.join(sourceDir, 'include/compiler.h'), [
                     '#include <time.h>'
                 ])
             }
         }
         if (platform == 'macosx') {
             if (version.match(/2.14/)) {
-                appendFile(path.join(absNasmDir, 'config/config.h'), [
+                appendFile(path.join(sourceDir, 'config/config.h'), [
                     '#define HAVE_SNPRINTF 1',
                     '#define HAVE_VSNPRINTF 1',
                     '#define HAVE_INTTYPES_H 1'
                 ])
             }
             if (version.match(/2.13/)) {
-                appendFile(path.join(absNasmDir, 'config/config.h'), [
+                appendFile(path.join(sourceDir, 'config/config.h'), [
                     '#define HAVE_STRLCPY 1',
                     '#define HAVE_DECL_STRLCPY 1',
                     '#define HAVE_SNPRINTF 1',
@@ -124,7 +127,7 @@ async function main() {
                 ])
             }
             if (version.match(/2.12/)) {
-                appendFile(path.join(absNasmDir, 'config.h'), [
+                appendFile(path.join(sourceDir, 'config.h'), [
                     '#define HAVE_STRLCPY 1',
                     '#define HAVE_DECL_STRLCPY 1',
                     '#define HAVE_SNPRINTF 1',
@@ -134,9 +137,12 @@ async function main() {
         }
 
         // Finally, build the damn binary.
-        execute(['make', 'nasm'], {cwd: absNasmDir})
+        execute(['make', 'nasm'], {cwd: sourceDir})
 
-        core.debug(`compiled NASM in '${absNasmDir}'`)
+        core.debug(`compiled NASM in '${sourceDir}'`)
+
+        // The binary is expected at a slightly different place...
+        fs.renameSync(path.join(sourceDir, nasm), absNasmFile)
     }
 
     var made_it = false
@@ -187,14 +193,6 @@ function execute(cmdline, extra_options) {
     return result
 }
 
-function dos2unix(path) {
-    const converted = path + '.unix'
-    const content = fs.readFileSync(path, {encoding: 'utf8'})
-    const unixified = content.replace(/\r\n/g, '\n')
-    fs.writeFileSync(converted, unixified, {encoding: 'utf8'})
-    fs.renameSync(converted, path)
-}
-
 function appendFile(path, strings) {
     fs.appendFileSync(path, '\n' + strings.join('\n') + '\n')
 }
@@ -210,6 +208,17 @@ async function fetchBuffer(url) {
     const buffer = await result.buffer()
     core.debug(`fetched ${buffer.length} bytes`)
     return buffer
+}
+
+async function extractTar(buffer, directory) {
+    core.info('Extracting source code...')
+    // Yes, I love async programming very much. So straightforward!
+    async function * data() { yield buffer; }
+    const tarball = stream.Readable.from(data())
+        .pipe(tar.extract(directory))
+    // Stream promise API is not available on GitHub Actions. Drain manually.
+    const finished = util.promisify(stream.finished)
+    return finished(tarball)
 }
 
 main().catch((e) => core.setFailed(`could not install NASM: ${e}`))

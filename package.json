@@ -1,6 +1,6 @@
 {
   "name": "setup-nasm",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "GitHub Action to download and install NASM",
   "main": "index.js",
   "scripts": {
@@ -23,11 +23,12 @@
   },
   "homepage": "https://github.com/ilammy/setup-nasm#readme",
   "dependencies": {
-    "@actions/core": "^1.1.1",
-    "adm-zip": "^0.4.13",
-    "node-fetch": "^2.6.1"
+    "@actions/core": "^1.2.6",
+    "adm-zip": "^0.4.16",
+    "node-fetch": "^2.6.1",
+    "tar-fs": "^2.1.1"
   },
   "devDependencies": {
-    "eslint": "^6.5.0"
+    "eslint": "^7.13.0"
   }
 }

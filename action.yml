@@ -4,7 +4,7 @@ inputs:
   version:
     description: NASM version to install
     required: true
-    default: 2.14.02
+    default: 2.15.05
   from-source:
     description: Force or deny compilation from source code
   platform:
