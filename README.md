@@ -11,7 +11,7 @@ Supports Linux, macOS, and Windows.
 
 ## Inputs
 
-- `version` – version of NASM to install (default: 2.14.02)
+- `version` – version of NASM to install (default: 2.15.05)
 - `from-source` – set to `true` to always build from source, or `false` to never
 - `platform` – set binary platform to something non-standard
 - `destination` – target directory for download and installation (default: `$HOME/nasm`)
