@@ -60,6 +60,21 @@ async function main() {
     }
 
     async function downloadBinary() {
+        if (platform == 'linux') {
+            await downloadBinaryRPM()
+        } else {
+            await downloadBinaryZIP()
+        }
+    }
+
+    async function downloadBinaryRPM() {
+        const url = new URL(`https://www.nasm.us/pub/nasm/releasebuilds/${version}/${platform}/nasm-${version}-0.fc31.x86_64.rpm`)
+        const buffer = await fetchBuffer(url)
+
+        throw new Error('RPM support not implemented')
+    }
+
+    async function downloadBinaryZIP() {
         const url = new URL(`https://www.nasm.us/pub/nasm/releasebuilds/${version}/${platform}/nasm-${version}-${platform}.zip`)
         const buffer = await fetchBuffer(url)
         const zip = new AdmZip(buffer)
