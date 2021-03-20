@@ -1,6 +1,8 @@
 const core = require('@actions/core')
 const AdmZip = require('adm-zip')
 const spawn = require('child_process').spawnSync
+const concat = require('concat-stream')
+const cpio = require('cpio-stream')
 const fs = require('fs')
 const fetch = require('node-fetch')
 const path = require('path')
@@ -260,7 +262,37 @@ async function extractTar(buffer, directory) {
 }
 
 async function extractCpio(buffer, srcFile, dstDirectory) {
-    throw new Error('not implemented')
+    const filename = path.basename(srcFile)
+    const dstFilename = path.join(dstDirectory, filename)
+
+    // Disclaimer: I know nothing about JavaScript and its promised async
+    // streams of callbacks -- and I don't really care as long as it works.
+    // Patches from offended developers will be very welcome.
+    let extract = cpio.extract()
+
+    extract.on('entry', (header, stream, callback) => {
+        if (header.name != srcFile) {
+            return
+        }
+        stream.pipe(concat(content => {
+            fs.writeFileSync(dstFilename, content)
+        }))
+        stream.on('end', () => {
+            callback()
+        })
+        stream.resume()
+    })
+
+    let promise = new Promise((resolve, reject) => {
+        extract.on('finish', () => resolve())
+        extract.on('error', reject)
+    })
+
+    extract.then = promise.then.bind(promise)
+    extract.catch = promise.catch.bind(promise)
+    extract.end(buffer)
+
+    return extract
 }
 
 main().catch((e) => core.setFailed(`could not install NASM: ${e}`))
