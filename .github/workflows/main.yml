@@ -6,6 +6,7 @@ on:
     branches:
       - master
       - release/*
+      - wip/rpm
   schedule:
     - cron:  '0 6 * * 1'
 
@@ -36,6 +37,7 @@ jobs:
   # so we have to duplicate the job instead of filtering out :(
   test-source:
     name: source-only
+    if: false
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
