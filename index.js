@@ -72,11 +72,11 @@ async function main() {
         const url = new URL(`https://www.nasm.us/pub/nasm/releasebuilds/${version}/${platform}/nasm-${version}-0.fc31.x86_64.rpm`)
         const buffer = await fetchBuffer(url)
 
-        core.debug(`RPM: downloaded ${buffer.length()} bytes`)
+        core.debug(`RPM: downloaded ${buffer.length} bytes`)
 
         const bufferCPIO = zlib.unzipSync(buffer)
 
-        core.debug(`RPM: unpacked ${bufferCPIO.length()} bytes`)
+        core.debug(`RPM: unpacked ${bufferCPIO.length} bytes`)
 
         throw new Error('RPM support not implemented')
     }
