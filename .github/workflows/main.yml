@@ -13,13 +13,12 @@ on:
 jobs:
   test-default:
     name: default
-    if: (matrix.os == 'ubuntu-latest') && (matrix.version == '2.15.05')
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
-        version: [2.15.05, 2.14.02]
+        os: [ubuntu-latest]
+        version: [2.15.05]
     steps:
       - name: Check out source code
         uses: actions/checkout@v1
