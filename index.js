@@ -69,12 +69,20 @@ async function main() {
     }
 
     async function downloadBinaryRPM() {
+        const GZIP_MAGIC = [0x1F, 0x8B, 0x08]
+
         const url = new URL(`https://www.nasm.us/pub/nasm/releasebuilds/${version}/${platform}/nasm-${version}-0.fc31.x86_64.rpm`)
         const buffer = await fetchBuffer(url)
 
         core.debug(`RPM: downloaded ${buffer.length} bytes`)
 
-        const bufferCPIO = zlib.unzipSync(buffer)
+        let index = buffer.indexOf(Buffer.from(GZIP_MAGIC))
+        if (index == -1) {
+            throw new Error(`RPM file is not gzipped`)
+        }
+        const bufferGZIP = buffer.slice(index)
+
+        const bufferCPIO = zlib.unzipSync(bufferGZIP)
 
         core.debug(`RPM: unpacked ${bufferCPIO.length} bytes`)
 
