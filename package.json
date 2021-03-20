@@ -25,6 +25,7 @@
   "dependencies": {
     "@actions/core": "^1.2.6",
     "adm-zip": "^0.4.16",
+    "cpio-stream": "^1.4.1",
     "node-fetch": "^2.6.1",
     "tar-fs": "^2.1.1"
   },
