@@ -9,6 +9,7 @@ const stream = require('stream')
 const tar = require('tar-fs')
 const URL = require('url').URL
 const util = require('util')
+const zlib = require('zlib')
 
 // This could have been a ten-line shell script, but no, we are full-stack async now...
 // Though, it does look pretty in the Web console.
@@ -72,6 +73,10 @@ async function main() {
         const buffer = await fetchBuffer(url)
 
         core.debug(`RPM: downloaded ${buffer.length()} bytes`)
+
+        const bufferCPIO = zlib.unzipSync(buffer)
+
+        core.debug(`RPM: unpacked ${bufferCPIO.length()} bytes`)
 
         throw new Error('RPM support not implemented')
     }
