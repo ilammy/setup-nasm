@@ -78,7 +78,15 @@ async function main() {
 
         core.debug(`RPM: unpacked ${bufferCPIO.length} bytes`)
 
-        throw new Error('RPM support not implemented')
+        await extractCpio(bufferCPIO, 'usr/bin/nasm', absNasmDir)
+
+        if (!fs.existsSync(absNasmFile)) {
+            core.debug(`nasm executable missing: ${absNasmFile}`)
+            throw new Error(`failed to extract to '${absNasmDir}'`)
+        }
+        fs.chmodSync(absNasmFile, '755')
+
+        core.debug(`extracted NASM to '${absNasmDir}'`)
     }
 
     async function downloadBinaryZIP() {
@@ -241,6 +249,10 @@ async function extractTar(buffer, directory) {
     // Stream promise API is not available on GitHub Actions. Drain manually.
     const finished = util.promisify(stream.finished)
     return finished(tarball)
+}
+
+async function extractCpio(buffer, srcFile, dstDirectory) {
+    throw new Error('not implemented')
 }
 
 main().catch((e) => core.setFailed(`could not install NASM: ${e}`))
