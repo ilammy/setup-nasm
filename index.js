@@ -270,14 +270,21 @@ async function extractCpio(buffer, srcFile, dstDirectory) {
     // Patches from offended developers will be very welcome.
     let extract = cpio.extract()
 
+    core.debug(`CPIO: ready to extract`)
+
     extract.on('entry', (header, stream, callback) => {
+        core.debug(`CPIO: entry: ${header}`)
         if (header.name != srcFile) {
+            core.debug(`CPIO: not interesting`)
             return
         }
+        core.debug(`CPIO: interesting`)
         stream.pipe(concat(content => {
+            core.debug(`CPIO: got content`)
             fs.writeFileSync(dstFilename, content)
         }))
         stream.on('end', () => {
+            core.debug(`CPIO: done`)
             callback()
         })
         stream.resume()
@@ -291,6 +298,8 @@ async function extractCpio(buffer, srcFile, dstDirectory) {
     extract.then = promise.then.bind(promise)
     extract.catch = promise.catch.bind(promise)
     extract.end(buffer)
+
+    core.debug(`CPIO: returning a promise`)
 
     return extract
 }
