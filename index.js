@@ -88,7 +88,7 @@ async function main() {
 
         core.debug(`RPM: unpacked ${bufferCPIO.length} bytes`)
 
-        await extractCpio(bufferCPIO, 'usr/bin/nasm', absNasmDir)
+        await extractCpio(bufferCPIO, '/usr/bin/nasm', absNasmDir)
 
         if (!fs.existsSync(absNasmFile)) {
             core.debug(`nasm executable missing: ${absNasmFile}`)
