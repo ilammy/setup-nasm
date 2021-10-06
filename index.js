@@ -153,7 +153,7 @@ async function main() {
             made_it = true
         }
         catch (error) {
-            core.warning(`binaries did not work: ${error}`)
+            core.info(`binaries did not work: ${error}`)
         }
     }
     if (try_source && !made_it) {
