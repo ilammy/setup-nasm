@@ -6,6 +6,8 @@ on:
     branches:
       - master
       - release/*
+  schedule:
+    - cron:  '0 6 * * 1'
 
 jobs:
   test-default:
@@ -54,3 +56,13 @@ jobs:
         shell: bash
         run: |
           [[ "$(nasm -version)" =~ "NASM version ${{ matrix.version }}" ]]
+  audit:
+    name: npm audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v1
+      - run: npm install
+      - run: npm run lint
+      - run: npm audit --audit-level=moderate --production
+      - run: npm audit --audit-level=critical
