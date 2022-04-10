@@ -9,6 +9,7 @@ const stream = require('stream')
 const tar = require('tar-fs')
 const URL = require('url').URL
 const util = require('util')
+const zlib = require("zlib")
 
 // This could have been a ten-line shell script, but no, we are full-stack async now...
 // Though, it does look pretty in the Web console.
@@ -86,8 +87,7 @@ async function main() {
             new URL(`https://www.nasm.us/pub/nasm/releasebuilds/${version}/nasm-${version}.tar.gz`),
         ]
         const buffer = await fetchFirstBuffer(urls)
-        // node-fetch returns already ungzipped tarball.
-        await extractTar(buffer, absNasmDir)
+        await extractTGZ(buffer, absNasmDir)
 
         // The tarball has all content in a versioned subdirectory: "nasm-2.15.05".
         const sourceDir = path.join(absNasmDir, `nasm-${version}`)
@@ -218,7 +218,7 @@ async function fetchFirstBuffer(urls) {
 
 async function fetchBuffer(url) {
     core.debug(`downloading ${url}...`)
-    const result = await fetch(url)
+    const result = await fetch(url, {compress: false})
     if (!result.ok) {
         const error = new Error(`HTTP GET failed: ${result.statusText}`)
         core.debug(`failed to fetch URL: ${error}`)
@@ -229,10 +229,13 @@ async function fetchBuffer(url) {
     return buffer
 }
 
-async function extractTar(buffer, directory) {
+async function extractTGZ(buffer, directory) {
     core.info('Extracting source code...')
     // Yes, I love async programming very much. So straightforward!
-    async function * data() { yield buffer; }
+    const gunzip = util.promisify(zlib.gunzip)
+    async function * data() {
+        yield await gunzip(buffer)
+    }
     const tarball = stream.Readable.from(data())
         .pipe(tar.extract(directory))
     // Stream promise API is not available on GitHub Actions. Drain manually.
