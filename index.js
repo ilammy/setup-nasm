@@ -60,8 +60,11 @@ async function main() {
     }
 
     async function downloadBinary() {
-        const url = new URL(`https://www.nasm.us/pub/nasm/releasebuilds/${version}/${platform}/nasm-${version}-${platform}.zip`)
-        const buffer = await fetchBuffer(url)
+        const urls = [
+            new URL(`https://github.com/ilammy/setup-nasm/raw/mirror/releasebuilds/${version}/${platform}/nasm-${version}-${platform}.zip`),
+            new URL(`https://www.nasm.us/pub/nasm/releasebuilds/${version}/${platform}/nasm-${version}-${platform}.zip`),
+        ]
+        const buffer = await fetchFirstBuffer(urls)
         const zip = new AdmZip(buffer)
 
         // Pull out the one binary we're interested in from the downloaded archive,
@@ -78,8 +81,11 @@ async function main() {
     }
 
     async function buildFromSource() {
-        const url = new URL(`https://www.nasm.us/pub/nasm/releasebuilds/${version}/nasm-${version}.tar.gz`)
-        const buffer = await fetchBuffer(url)
+        const urls = [
+            new URL(`https://github.com/ilammy/setup-nasm/raw/mirror/releasebuilds/${version}/nasm-${version}.tar.gz`),
+            new URL(`https://www.nasm.us/pub/nasm/releasebuilds/${version}/nasm-${version}.tar.gz`),
+        ]
+        const buffer = await fetchFirstBuffer(urls)
         // node-fetch returns already ungzipped tarball.
         await extractTar(buffer, absNasmDir)
 
@@ -195,6 +201,19 @@ function execute(cmdline, extra_options) {
 
 function appendFile(path, strings) {
     fs.appendFileSync(path, '\n' + strings.join('\n') + '\n')
+}
+
+async function fetchFirstBuffer(urls) {
+    let last_error
+    for (const url of urls) {
+        try {
+            return await fetchBuffer(url)
+        }
+        catch (error) {
+            last_error = error
+        }
+    }
+    throw last_error
 }
 
 async function fetchBuffer(url) {
