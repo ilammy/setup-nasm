@@ -23,5 +23,5 @@ jobs:
       with:
         title: "Update package-lock.json (dependencies)"
         branch: update-package-lock
-        base: master
+        base: release/v1
         commit-message: "[Bot] Update package-lock.json dependencies"
