@@ -18,7 +18,7 @@ jobs:
       with:
         node-version: 'lts/*'
     - run: npm install --package-lock --production
-    - run: npm audit fix
+    - run: npm audit fix --omit dev
     - uses: peter-evans/create-pull-request@v3
       with:
         title: "Update package-lock.json (dependencies)"
