@@ -13,7 +13,7 @@ inputs:
       One of: `dos`, `linux`, `macosx`, `win32`, `win64`
       See https://www.nasm.us/pub/nasm/releasebuilds/ for available platforms.
 runs:
-  using: node12
+  using: node16
   main: index.js
 branding:
   icon: archive
