@@ -35,7 +35,9 @@ async function main() {
     const homedir = require('os').homedir()
     const absNasmDir = path.resolve(homedir, destination)
     const nasm = (process.platform == 'win32' ? 'nasm.exe' : 'nasm')
+    const ndisasm = (process.platform == 'win32' ? 'ndisasm.exe' : 'ndisasm')
     const absNasmFile = path.join(absNasmDir, nasm)
+    const absNdisasmFile = path.join(absNasmDir, ndisasm)
 
     if (!fs.existsSync(absNasmDir)) {
         fs.mkdirSync(absNasmDir, {recursive: true})
@@ -77,6 +79,14 @@ async function main() {
             throw new Error(`failed to extract to '${absNasmDir}'`)
         }
         fs.chmodSync(absNasmFile, '755')
+
+        const ndisasmEntry = `nasm-${version}/${ndisasm}`
+        zip.extractEntryTo(ndisasmEntry, absNasmDir, false, true)
+        if (!fs.existsSync(absNdisasmFile)) {
+            core.debug(`ndisasm executable missing: ${absNdisasmFile}`)
+            throw new Error(`failed to extract to '${absNasmDir}'`)
+        }
+        fs.chmodSync(absNdisasmFile, '755')
 
         core.debug(`extracted NASM to '${absNasmDir}'`)
     }
@@ -143,12 +153,13 @@ async function main() {
         }
 
         // Finally, build the damn binary.
-        execute(['make', 'nasm'], {cwd: sourceDir})
+        execute(['make', 'nasm', 'ndisasm'], {cwd: sourceDir})
 
         core.debug(`compiled NASM in '${sourceDir}'`)
 
         // The binary is expected at a slightly different place...
         fs.renameSync(path.join(sourceDir, nasm), absNasmFile)
+        fs.renameSync(path.join(sourceDir, ndisasm), absNdisasmFile)
     }
 
     var made_it = false
@@ -177,6 +188,7 @@ async function main() {
     }
 
     execute([absNasmFile, '-version'])
+    execute([absNdisasmFile, '-version'])
     core.addPath(absNasmDir)
 }
 

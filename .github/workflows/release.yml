@@ -1,11 +1,9 @@
-name: setup-nasm
+name: setup-nasm (release)
 
 on:
-  pull_request:
   push:
     branches:
-      - master
-      - release/*
+      - release/v1
   schedule:
     - cron:  '0 6 * * 1'
 
@@ -21,10 +19,8 @@ jobs:
     steps:
       - name: Check out source code
         uses: actions/checkout@v3
-      - name: Download Internet
-        run: npm install
       - name: Install NASM
-        uses: ./
+        uses: ilammy/setup-nasm@release/v1
         with:
           version: ${{ matrix.version }}
       - name: Verify NASM
@@ -46,10 +42,8 @@ jobs:
     steps:
       - name: Check out source code
         uses: actions/checkout@v3
-      - name: Download Internet
-        run: npm install
       - name: Install NASM
-        uses: ./
+        uses: ilammy/setup-nasm@release/v1
         with:
           version: ${{ matrix.version }}
           from-source: true
@@ -64,7 +58,5 @@ jobs:
     steps:
       - name: Check out source code
         uses: actions/checkout@v3
-      - run: npm install
-      - run: npm run lint
       - run: npm audit --audit-level=moderate --production
       - run: npm audit --audit-level=critical
