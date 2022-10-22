@@ -17,7 +17,7 @@ jobs:
     - uses: actions/setup-node@v2
       with:
         node-version: 'lts/*'
-    - run: npm install --package-lock
+    - run: npm install --package-lock --production
     - run: npm audit fix
     - uses: peter-evans/create-pull-request@v3
       with:
