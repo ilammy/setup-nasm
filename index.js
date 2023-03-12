@@ -99,7 +99,7 @@ async function main() {
         const buffer = await fetchFirstBuffer(urls)
         await extractTGZ(buffer, absNasmDir)
 
-        // The tarball has all content in a versioned subdirectory: "nasm-2.15.05".
+        // The tarball has all content in a versioned subdirectory: "nasm-2.16.01".
         const sourceDir = path.join(absNasmDir, `nasm-${version}`)
         core.debug(`extracted NASM to '${sourceDir}'`)
 
