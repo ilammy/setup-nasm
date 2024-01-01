@@ -17,7 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-        version: [2.15.05, 2.14.02]
+        version: [2.16.01, 2.15.05, 2.14.02]
     steps:
       - name: Check out source code
         uses: actions/checkout@v3
@@ -42,7 +42,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest]
-        version: [2.15.05, 2.14.02]
+        version: [2.16.01, 2.15.05, 2.14.02]
     steps:
       - name: Check out source code
         uses: actions/checkout@v3
